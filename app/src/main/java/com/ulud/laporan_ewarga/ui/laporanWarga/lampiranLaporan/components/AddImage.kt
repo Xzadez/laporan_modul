@@ -41,7 +41,7 @@ fun AddImage(onClick: () -> Unit = {}) {
             modifier = Modifier
                 .border(
                     width = 2.dp,
-                    colorResource(R.color.primaryColor), CircleShape
+                    MaterialTheme.colorScheme.primary, CircleShape
                 )
         )
         Spacer(Modifier.width(6.dp))

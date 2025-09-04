@@ -1,5 +1,7 @@
 package com.ulud.laporan_ewarga.ui.laporanWarga
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,17 +20,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import com.ulud.laporan_ewarga.R
-import com.ulud.laporan_ewarga.ui.laporanWarga.components.LeadingIconType
-import com.ulud.laporan_ewarga.ui.laporanWarga.components.TopBarLaporan
+import com.ulud.laporan_ewarga.ui.SetStatusBarColor
+import com.ulud.laporan_ewarga.ui.components.LeadingIconType
+import com.ulud.laporan_ewarga.ui.components.TopBarLaporan
 import com.ulud.laporan_ewarga.ui.laporanWarga.tabs.laporanKuTab.LaporanKuTab
 import com.ulud.laporan_ewarga.ui.laporanWarga.tabs.laporanTab.LaporanTab
 import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun LaporanWargaScreen(onMenu: () -> Unit = {}, onCreateLaporan: () -> Unit = {}) {
+
     Scaffold(
         topBar = {
             TopBarLaporan(

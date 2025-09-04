@@ -1,5 +1,6 @@
 package com.ulud.laporan_ewarga.ui.laporanWarga.tabs.laporanTab
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,13 +23,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.ulud.laporan_ewarga.domain.model.Laporan
 import com.ulud.laporan_ewarga.ui.Dimen
 import com.ulud.laporan_ewarga.ui.components.SearchTextField
 import com.ulud.laporan_ewarga.ui.laporanWarga.components.EmptyLaporanMessage
 import com.ulud.laporan_ewarga.ui.laporanWarga.components.FilterChip
+import com.ulud.laporan_ewarga.ui.laporanWarga.detailLaporan.DetailLaporanActivity
 import com.ulud.laporan_ewarga.ui.laporanWarga.tabs.component.LaporanItemCard
+import splitties.activities.start
 
 @Composable
 fun LaporanContent(
@@ -43,13 +47,15 @@ fun LaporanContent(
     onFilterSortClick: () -> Unit,
     onClearFiltersClick: () -> Unit,
 ) {
+    val context = LocalContext.current
 
     LazyColumn(
         modifier = Modifier
-            .padding(Dimen.Padding.large)
+            .padding(horizontal = Dimen.Padding.large)
             .fillMaxSize()
     ) {
         item {
+            Spacer(Modifier.height(Dimen.Padding.large))
             SearchTextField(
                 value = textSearch,
                 onValueChange = onTextSearchChange
@@ -103,7 +109,20 @@ fun LaporanContent(
             }
         } else {
             items(laporanList) { laporan ->
-                LaporanItemCard(laporan, onClick = {})
+                LaporanItemCard(laporan, onClick = {
+                    context.start<DetailLaporanActivity> {
+                        putExtra("title", laporan.title)
+                        putExtra("category", laporan.category)
+                        putExtra("status", laporan.status)
+                        putStringArrayListExtra("photos", ArrayList(laporan.photos))
+                        putExtra("description", laporan.description)
+                        putExtra("createdAt", laporan.createdAt)
+                        putExtra("can_show_menu", false)
+                    }
+                })
+            }
+            item {
+                Spacer(Modifier.height(Dimen.Padding.large))
             }
         }
     }

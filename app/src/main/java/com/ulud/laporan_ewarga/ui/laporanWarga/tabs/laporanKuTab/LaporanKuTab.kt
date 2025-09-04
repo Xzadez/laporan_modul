@@ -7,83 +7,62 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.ulud.laporan_ewarga.ui.components.BottomSheetRadioButton
-import com.ulud.laporan_ewarga.ui.laporanWarga.LaporanViewModel
-import kotlinx.coroutines.launch
+import com.ulud.laporan_ewarga.ui.laporanWarga.LaporanWargaViewModel
+import com.ulud.laporan_ewarga.ui.laporanWarga.tabs.TabType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LaporanKuTab(
-    laporanViewModel: LaporanViewModel = viewModel(),
+    laporanViewModel: LaporanWargaViewModel = hiltViewModel(),
 ) {
-    var textSearch by remember { mutableStateOf("") }
+    val state by laporanViewModel.uiState.collectAsState()
+    val laporanList by laporanViewModel.filteredMyLaporan.collectAsState()
+    val tabState = state.laporanKuTab
 
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val statusOptions = remember { listOf("Draft", "Antrian", "Proses", "Tanggapan", "Selesai") }
     val sortOptions = remember { listOf("Terbaru", "Terlama") }
-
-    var showStatusBottomSheet by remember { mutableStateOf(false) }
-    var showSortBottomSheet by remember { mutableStateOf(false) }
-
-    var selectedStatusOption by remember { mutableStateOf<String?>(null) }
-    var selectedSortOption by remember { mutableStateOf<String?>(null) }
-
-    val scope = rememberCoroutineScope()
-
-    val laporanList by laporanViewModel.myLaporan.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
         LaporanKuContent(
             laporanList = laporanList,
-            textSearch = textSearch,
-            onTextSearchChange = { textSearch = it },
-            selectedSortOption = selectedSortOption ?: "Urutkan",
-            selectedStatusOption = selectedStatusOption ?: "Status",
-            isStatusFiltered = selectedStatusOption != null,
-            isSortFiltered = selectedSortOption != null,
-            onFilterStatusClick = { showStatusBottomSheet = true },
-            onFilterSortClick = { showSortBottomSheet = true },
-            onClearFiltersClick = {
-                selectedStatusOption = null
-                selectedSortOption = null
-            },
+            textSearch = tabState.searchText,
+            onTextSearchChange = { laporanViewModel.onSearchChanged(it, TabType.LAPORAN_KU) },
+            selectedSortOption = tabState.selectedSort ?: "Urutkan",
+            selectedStatusOption = tabState.selectedStatus ?: "Status",
+            isStatusFiltered = tabState.selectedStatus != null,
+            isSortFiltered = tabState.selectedSort != null,
+            onFilterStatusClick = { laporanViewModel.onFilterClick(true, TabType.LAPORAN_KU) },
+            onFilterSortClick = { laporanViewModel.onFilterClick(false, TabType.LAPORAN_KU) },
+            onClearFiltersClick = { laporanViewModel.onClearFilters(TabType.LAPORAN_KU) },
         )
 
-        if (showStatusBottomSheet) {
+        if (tabState.isStatusSheetVisible) {
             BottomSheetRadioButton(
                 title = "Status Laporan",
-                onDismissRequest = { showStatusBottomSheet = false },
+                onDismissRequest = { laporanViewModel.onDismissBottomSheet(TabType.LAPORAN_KU) },
                 sheetState = sheetState,
                 options = statusOptions,
-                initialSelection = selectedStatusOption,
+                initialSelection = tabState.selectedStatus,
             ) { newSelection ->
-                selectedStatusOption = newSelection
-                scope.launch { sheetState.hide() }.invokeOnCompletion {
-                    showStatusBottomSheet = false
-                }
+                laporanViewModel.onStatusSelected(newSelection, TabType.LAPORAN_KU)
             }
         }
 
-        if (showSortBottomSheet) {
+        if (tabState.isSortSheetVisible) {
             BottomSheetRadioButton(
                 title = "Urutkan",
-                onDismissRequest = { showSortBottomSheet = false },
+                onDismissRequest = { laporanViewModel.onDismissBottomSheet(TabType.LAPORAN_KU) },
                 sheetState = sheetState,
                 options = sortOptions,
-                initialSelection = selectedSortOption,
+                initialSelection = tabState.selectedSort,
             ) { newSelection ->
-                selectedSortOption = newSelection
-                scope.launch { sheetState.hide() }.invokeOnCompletion {
-                    showSortBottomSheet = false
-                }
+                laporanViewModel.onSortSelected(newSelection, TabType.LAPORAN_KU)
             }
         }
     }
 }
-

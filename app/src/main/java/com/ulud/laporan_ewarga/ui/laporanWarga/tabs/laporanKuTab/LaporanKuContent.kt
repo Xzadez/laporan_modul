@@ -53,10 +53,13 @@ fun LaporanKuContent(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(Dimen.Padding.large),
+            .padding(horizontal = Dimen.Padding.large)
+            .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
+
     ) {
         item {
+            Spacer(Modifier.height(Dimen.Padding.large))
             SearchTextField(
                 value = textSearch,
                 onValueChange = onTextSearchChange
@@ -66,7 +69,6 @@ fun LaporanKuContent(
         item {
             Spacer(Modifier.height(6.dp))
             Row(
-
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
@@ -130,8 +132,13 @@ fun LaporanKuContent(
                         putExtra("status", laporan.status)
                         putStringArrayListExtra("photos", ArrayList(laporan.photos))
                         putExtra("description", laporan.description)
+                        putExtra("createdAt", laporan.createdAt)
+                        putExtra("can_show_menu", true)
                     }
                 })
+            }
+            item {
+                Spacer(Modifier.height(Dimen.Padding.large))
             }
         }
     }

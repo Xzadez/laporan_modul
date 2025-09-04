@@ -22,10 +22,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -35,34 +37,44 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.ulud.laporan_ewarga.R
 import com.ulud.laporan_ewarga.ui.Dimen
 import com.ulud.laporan_ewarga.ui.components.BackButton
+import com.ulud.laporan_ewarga.ui.components.PrimaryButton
 import com.ulud.laporan_ewarga.ui.components.tags.CategoryTag
 import com.ulud.laporan_ewarga.ui.components.tags.StatusTag
 import com.ulud.laporan_ewarga.ui.laporanWarga.detailLaporan.component.ImageDialog
+import com.ulud.laporan_ewarga.ui.laporanWarga.detailLaporan.component.PopupMenu
+import com.ulud.laporan_ewarga.utils.FormattedDate
 
 @Composable
 fun DetailLaporanScreen(
+    viewModel: DetailLaporanViewModel = hiltViewModel(),
     onBack: () -> Unit = {},
-    kategoriLaporan: String = "",
-    judulLaporan: String = "",
-    status: String = "",
-    imageList: List<String> = emptyList(),
-    deskripsiLaporan: String = "",
+    onSubmit: () -> Unit = {},
+    onUpdate: () -> Unit = {},
+    onDelete: () -> Unit = {},
+    onLihatResponClick: () -> Unit = {},
 ) {
-    var showImageDialog by remember { mutableStateOf(false) }
-    var selectedImageIndex by remember { mutableStateOf<Int?>(null) }
+    val state by viewModel.state.collectAsState()
+    val laporan = state.laporan ?: return
+
+    val dateText = when {
+        state.isPreview -> "Preview"
+        laporan.status.equals("Draft", ignoreCase = true) -> "Draft"
+        else -> FormattedDate(laporan.createdAt)
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
     ) {
-        if (imageList.isNotEmpty()) {
+        if (laporan.photos.isNotEmpty()) {
             AsyncImage(
-                model = imageList.first(),
+                model = laporan.photos.first(),
                 contentDescription = "Gambar utama laporan",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -103,15 +115,15 @@ fun DetailLaporanScreen(
                         .fillMaxWidth()
                         .padding(horizontal = Dimen.Padding.normal)
                 ) {
-                    CategoryTag(kategoriLaporan)
-                    StatusTag(status)
+                    CategoryTag(laporan.category)
+                    StatusTag(laporan.status)
                 }
 
                 Spacer(Modifier.height(14.dp))
 
                 Text(
                     modifier = Modifier.padding(horizontal = Dimen.Padding.normal),
-                    text = judulLaporan,
+                    text = laporan.title,
                     fontSize = Dimen.FontSize.large,
                     fontWeight = FontWeight.Bold,
                     color = colorResource(R.color.textPrimary)
@@ -127,12 +139,13 @@ fun DetailLaporanScreen(
                 ) {
                     Text(
                         text = "Ahmad Nashruddin",
-                        fontSize = Dimen.FontSize.medium,
+                        fontSize = Dimen.FontSize.small,
                         color = MaterialTheme.colorScheme.primary
                     )
+
                     Text(
-                        text = "Preview",
-                        fontSize = Dimen.FontSize.medium,
+                        text = dateText,
+                        fontSize = Dimen.FontSize.small,
                         color = colorResource(R.color.textSecondary)
                     )
                 }
@@ -141,7 +154,7 @@ fun DetailLaporanScreen(
                     contentPadding = PaddingValues(Dimen.Padding.normal),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    itemsIndexed(imageList) { index, imgUrl ->
+                    itemsIndexed(laporan.photos) { index, imgUrl ->
                         AsyncImage(
                             model = imgUrl,
                             contentDescription = null,
@@ -150,28 +163,19 @@ fun DetailLaporanScreen(
                                 .size(90.dp)
                                 .clip(RoundedCornerShape(8.dp))
                                 .clickable {
-                                    selectedImageIndex = index
-                                    showImageDialog = true
+                                    viewModel.onImageClicked(index)
                                 }
                         )
                     }
                 }
 
-                if (showImageDialog && selectedImageIndex != null) {
+                if (state.showImageDialog) {
                     ImageDialog(
-                        imageList = imageList.map { it as Any },
-                        currentIndex = selectedImageIndex!!,
-                        onDismiss = { showImageDialog = false },
-                        onNext = {
-                            if (selectedImageIndex!! < imageList.size - 1) {
-                                selectedImageIndex = selectedImageIndex!! + 1
-                            }
-                        },
-                        onPrevious = {
-                            if (selectedImageIndex!! > 0) {
-                                selectedImageIndex = selectedImageIndex!! - 1
-                            }
-                        }
+                        imageList = laporan.photos.map { it as Any },
+                        currentIndex = state.selectedImageIndex,
+                        onDismiss = viewModel::onDismissImageDialog,
+                        onNext = viewModel::onNextImage,
+                        onPrevious = viewModel::onPreviousImage
                     )
                 }
 
@@ -179,18 +183,43 @@ fun DetailLaporanScreen(
 
                 Text(
                     modifier = Modifier.padding(horizontal = Dimen.Padding.normal),
-                    text = deskripsiLaporan,
+                    text = laporan.description,
                     fontSize = 14.sp,
-                    color = Color(0xFF444444),
                     lineHeight = 20.sp
                 )
+
+                val status = laporan.status.lowercase()
+                if (status !in listOf("antrian", "draft") && !state.isPreview) {
+                    Spacer(Modifier.height(Dimen.Padding.large))
+                    PrimaryButton(
+                        text = "Lihat Respon",
+                        onClick = onLihatResponClick,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = Dimen.Padding.normal)
+                    )
+                }
+
                 Spacer(Modifier.height(50.dp))
             }
         }
 
-        BackButton(
-            modifier = Modifier.padding(Dimen.Padding.normal),
-            onBack = onBack
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Dimen.Padding.normal),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            BackButton(onBack = onBack)
+            if (state.canShowMenu) {
+                PopupMenu(
+                    status = laporan.status,
+                    onSubmit = onSubmit,
+                    onUpdate = onUpdate,
+                    onDelete = onDelete
+                )
+            }
+        }
     }
 }

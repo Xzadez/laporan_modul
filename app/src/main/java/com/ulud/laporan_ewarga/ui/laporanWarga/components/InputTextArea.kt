@@ -2,8 +2,11 @@ package com.ulud.laporan_ewarga.ui.laporanWarga.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imeNestedScroll
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -22,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ulud.laporan_ewarga.ui.components.LabeledContainer
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun InputTextArea(
     label: String,
@@ -61,6 +65,8 @@ fun InputTextArea(
                     modifier = Modifier
                         .focusRequester(focusRequester)
                         .fillMaxWidth()
+                        .imeNestedScroll()
+                        .imePadding()
                 )
                 if (value.isEmpty()) {
                     Text(

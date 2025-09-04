@@ -38,6 +38,7 @@ import com.ulud.laporan_ewarga.R
 import com.ulud.laporan_ewarga.domain.model.Laporan
 import com.ulud.laporan_ewarga.ui.Dimen
 import com.ulud.laporan_ewarga.ui.components.tags.CategoryTag
+import com.ulud.laporan_ewarga.utils.FormattedDate
 
 @Composable
 fun LaporanItemCard(laporan: Laporan, onClick: () -> Unit = {}) {
@@ -56,12 +57,12 @@ fun LaporanItemCard(laporan: Laporan, onClick: () -> Unit = {}) {
                 modifier = Modifier
                     .weight(1f)
                     .heightIn(min = 120.dp)
-                    .padding(16.dp),
+                    .padding(Dimen.Padding.medium),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "31 Oktober 2007",
-                    fontSize = 10.sp,
+                    text = FormattedDate(laporan.createdAt),
+                    fontSize = Dimen.FontSize.extraSmall,
                     letterSpacing = 0.sp,
                     color = colorResource(R.color.textSecondary).copy(0.7f),
                     lineHeight = 1.sp
@@ -69,13 +70,13 @@ fun LaporanItemCard(laporan: Laporan, onClick: () -> Unit = {}) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(70.dp),
+                        .height(68.dp),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
                         text = laporan.title,
                         letterSpacing = 0.sp,
-                        lineHeight = 18.sp,
+                        lineHeight = 14.sp,
                         fontSize = Dimen.FontSize.medium,
                         maxLines = 2
                     )

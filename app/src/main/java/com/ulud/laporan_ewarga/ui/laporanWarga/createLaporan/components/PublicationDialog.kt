@@ -35,7 +35,7 @@ fun PublicationDialog(
     val isChoiceSelected = selectedChoice != null
     val dialogTitle = when (selectedChoice) {
         PublicationChoice.PUBLISH_NOW -> "Kirim Laporan Sekarang"
-        PublicationChoice.DRAFT -> "Simpan Sebagai Draf"
+        PublicationChoice.DRAFT -> "Simpan Sebagai Draft"
         null -> "Konfirmasi Kirim Laporan"
     }
 
@@ -98,8 +98,8 @@ fun PublicationDialog(
                     ChoiceOption(
                         choice = PublicationChoice.DRAFT,
                         selected = selectedChoice == PublicationChoice.DRAFT,
-                        title = "Draf (nanti)",
-                        description = "Jika Anda masih ragu untuk mengirim laporan Anda, silakan pilih opsi \"draf\" untuk menyimpan laporan tanpa mengirimnya.",
+                        title = "Draft (nanti)",
+                        description = "Jika Anda masih ragu untuk mengirim laporan Anda, silakan pilih opsi \"draft\" untuk menyimpan laporan tanpa mengirimnya.",
                         onClick = {
                             selectedChoice = if (selectedChoice == PublicationChoice.DRAFT) {
                                 null

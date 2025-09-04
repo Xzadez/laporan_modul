@@ -20,7 +20,7 @@ fun CategoryTag(value: String = "Kategori") {
         fontSize = Dimen.FontSize.extraSmall,
         modifier = Modifier
             .background(
-                colorResource(R.color.greenTertiary),
+                MaterialTheme.colorScheme.tertiary,
                 RoundedCornerShape(20.dp)
             )
             .padding(

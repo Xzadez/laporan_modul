@@ -1,5 +1,6 @@
 package com.ulud.laporan_ewarga.ui.laporanWarga.createLaporan
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +14,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,18 +25,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.ulud.laporan_ewarga.R
 import com.ulud.laporan_ewarga.domain.model.Laporan
 import com.ulud.laporan_ewarga.ui.Dimen
 import com.ulud.laporan_ewarga.ui.components.ExitConfirmationDialog
 import com.ulud.laporan_ewarga.ui.components.InputTextField
-import com.ulud.laporan_ewarga.ui.laporanWarga.LaporanViewModel
 import com.ulud.laporan_ewarga.ui.laporanWarga.components.InputDisplayField
 import com.ulud.laporan_ewarga.ui.laporanWarga.components.InputDropDown
 import com.ulud.laporan_ewarga.ui.laporanWarga.components.InputTextArea
-import com.ulud.laporan_ewarga.ui.laporanWarga.components.LeadingIconType
-import com.ulud.laporan_ewarga.ui.laporanWarga.components.TopBarLaporan
+import com.ulud.laporan_ewarga.ui.components.LeadingIconType
+import com.ulud.laporan_ewarga.ui.components.TopBarLaporan
 import com.ulud.laporan_ewarga.ui.laporanWarga.createLaporan.components.CardFooter
 import com.ulud.laporan_ewarga.ui.laporanWarga.createLaporan.components.PublicationChoice
 import com.ulud.laporan_ewarga.ui.laporanWarga.createLaporan.components.PublicationDialog
@@ -44,18 +45,16 @@ import splitties.toast.longToast
 @OptIn(UnreliableToastApi::class)
 @Composable
 fun CreateLaporanScreen(
-    attachedPhotos: List<String>,
+    viewModel: CreateLaporanViewModel = hiltViewModel(),
     onBack: () -> Unit = {},
     onBrowse: () -> Unit = {},
     onPrieview: (Laporan) -> Unit = {},
-    onSubmit: () -> Unit = {},
-    laporanViewModel: LaporanViewModel = viewModel()
 ) {
+    val state by viewModel.uiState.collectAsState()
+
     var showExitDialog by remember { mutableStateOf(false) }
-    var textValue by remember { mutableStateOf("") }
-    var textArea by remember { mutableStateOf("") }
     var showPublicationDialog by remember { mutableStateOf(false) }
-    var selectedCategory by remember { mutableStateOf("Lingkungan Warga") }
+
     val categories =
         listOf(
             "Kegiatan Warga",
@@ -65,19 +64,23 @@ fun CreateLaporanScreen(
             "Lain - Lain"
         )
 
-    val attachmentText = if (attachedPhotos.isNotEmpty()) {
-        "${attachedPhotos.size} Gambar Terlampir"
+    val attachmentText = if (state.photos.isNotEmpty()) {
+        "${state.photos.size} Gambar Terlampir"
     } else {
         "Ambil Gambar ..."
     }
 
-    val attachmentColor = if (attachedPhotos.isNotEmpty()) {
+    val attachmentColor = if (state.photos.isNotEmpty()) {
         colorResource(R.color.textPrimary)
     } else {
         colorResource(R.color.textSecondary)
     }
 
-    var setLocation by remember { mutableStateOf<String?>("Lokasi Kejadian..") }
+    val setLocation by remember { mutableStateOf<String?>("Lokasi Kejadian..") }
+
+    BackHandler {
+        showExitDialog = true
+    }
 
     Scaffold(
         topBar = {
@@ -118,8 +121,8 @@ fun CreateLaporanScreen(
                 ) {
                     InputTextField(
                         label = "Judul",
-                        value = textValue,
-                        onValueChange = { textValue = it },
+                        value = state.title,
+                        onValueChange = viewModel::onTitleChange,
                         placeholder = "Masukkan judul laporan",
                     )
                     InputDisplayField(
@@ -138,17 +141,15 @@ fun CreateLaporanScreen(
                     )
                     InputDropDown(
                         label = "Kategori Laporan",
-                        value = selectedCategory,
+                        value = state.category,
                         options = categories,
-                        onOptionSelected = { newCategory ->
-                            selectedCategory = newCategory
-                        }
+                        onOptionSelected = viewModel::onCategoryChange
                     )
 
                     InputTextArea(
                         label = "Deskripsi",
-                        value = textArea,
-                        onValueChange = { textArea = it },
+                        value = state.description,
+                        onValueChange = viewModel::onDescriptionChange,
                         placeholder = "Deskripsi Laporan ...."
                     )
                     InputDisplayField(
@@ -169,38 +170,38 @@ fun CreateLaporanScreen(
             }
             CardFooter(
                 onPreview = {
-                    if (textValue.isBlank()) {
+                    if (state.title.isBlank()) {
                         longToast("Judul laporan tidak boleh kosong.")
                         return@CardFooter
                     }
-                    if (attachedPhotos.isEmpty()) {
+                    if (state.photos.isEmpty()) {
                         longToast("Harap lampirkan setidaknya satu gambar.")
                         return@CardFooter
                     }
-                    if (textArea.isBlank()) {
+                    if (state.description.isBlank()) {
                         longToast("Deskripsi laporan tidak boleh kosong.")
                         return@CardFooter
                     }
                     onPrieview(
                         Laporan(
-                            title = textValue,
-                            category = selectedCategory,
+                            title = state.title,
+                            category = state.category,
                             status = "Preview",
-                            photos = attachedPhotos,
-                            description = textArea
+                            photos = state.photos,
+                            description = state.description
                         )
                     )
                 },
                 onSubmit = {
-                    if (textValue.isBlank()) {
+                    if (state.title.isBlank()) {
                         longToast("Judul laporan tidak boleh kosong.")
                         return@CardFooter
                     }
-                    if (attachedPhotos.isEmpty()) {
+                    if (state.photos.isEmpty()) {
                         longToast("Harap lampirkan setidaknya satu gambar.")
                         return@CardFooter
                     }
-                    if (textArea.isBlank()) {
+                    if (state.description.isBlank()) {
                         longToast("Deskripsi laporan tidak boleh kosong.")
                         return@CardFooter
                     }
@@ -222,27 +223,14 @@ fun CreateLaporanScreen(
 
             if (showPublicationDialog) {
                 PublicationDialog(
-                    onDismiss = {
-                        showPublicationDialog = false
-                    },
-                    onApply = { choice ->
-                        showPublicationDialog = false
+                    onDismiss = { showPublicationDialog = false },
+                    onApply = { choice -> showPublicationDialog = false
 
                         val isDraft = choice == PublicationChoice.DRAFT
-                        val status = if (isDraft) "Draf" else "Antrian"
 
-                        val newLaporan = Laporan(
-                            title = textValue,
-                            category = selectedCategory,
-                            status = status,
-                            photos = attachedPhotos,
-                            description = textArea,
-                            isDraft = isDraft
-                        )
+                        viewModel.saveLaporan(isDraft = isDraft)
 
-                        laporanViewModel.addLaporan(newLaporan)
-
-                        longToast(if (isDraft) "Laporan disimpan sebagai draf." else "Laporan dikirim!")
+                        longToast(if (isDraft) "Laporan disimpan sebagai draft." else "Laporan dikirim!")
                         onBack()
                     }
                 )

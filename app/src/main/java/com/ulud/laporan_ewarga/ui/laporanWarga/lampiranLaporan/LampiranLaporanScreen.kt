@@ -1,7 +1,6 @@
 package com.ulud.laporan_ewarga.ui.laporanWarga.lampiranLaporan
 
 import android.Manifest
-import android.content.Context
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -22,8 +21,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -33,72 +33,59 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.FileProvider
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.ulud.laporan_ewarga.R
 import com.ulud.laporan_ewarga.ui.Dimen
 import com.ulud.laporan_ewarga.ui.components.BottomSheetList
-import com.ulud.laporan_ewarga.ui.components.PrimaryButton
-import com.ulud.laporan_ewarga.ui.laporanWarga.components.LeadingIconType
-import com.ulud.laporan_ewarga.ui.laporanWarga.components.TopBarLaporan
+import com.ulud.laporan_ewarga.ui.components.LeadingIconType
+import com.ulud.laporan_ewarga.ui.components.TopBarLaporan
 import com.ulud.laporan_ewarga.ui.laporanWarga.lampiranLaporan.components.AddImage
 import com.ulud.laporan_ewarga.ui.laporanWarga.lampiranLaporan.components.ImageItem
 import com.ulud.laporan_ewarga.ui.laporanWarga.lampiranLaporan.components.InfoAlert
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LampiranLaporanScreen(initialPhotos: List<String>, onBack: (List<String>) -> Unit = {}) {
+fun LampiranLaporanScreen(
+    viewModel: LampiranLaporanViewModel = hiltViewModel(),
+    onBack: (List<String>) -> Unit = {},
+) {
     val context = LocalContext.current
-    val photos = remember { mutableStateListOf(*initialPhotos.toTypedArray()) }
-    val listOption = remember { listOf("Ambil Gambar", "Pilih Gambar dari Galeri") }
 
+    val state by viewModel.state.collectAsState()
+
+    val listOption = remember { listOf("Ambil Gambar", "Pilih Gambar dari Galeri") }
     val sheetState = rememberModalBottomSheetState()
-    var showBottomSheet by remember { mutableStateOf(false) }
 
     var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
 
+    LaunchedEffect(state.errorMessage) {
+        state.errorMessage?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            viewModel.errorMessageShown()
+        }
+    }
+
+
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
-    ) { success: Boolean ->
+    ) { success ->
         if (success) {
-            cameraImageUri?.let {
-                if (photos.size < 5) photos.add(it.toString())
-            }
+            cameraImageUri?.let { viewModel.onAddPhoto(it.toString()) }
         }
     }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        uri?.let {
-            if (photos.size < 5) photos.add(it.toString())
-        }
+        uri?.let { viewModel.onAddPhoto(it.toString()) }
     }
 
-    fun createImageUri(context: Context, customName: String? = null): Uri? {
-        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val fileName = customName ?: "laporan_$timeStamp"
-
-        val imageFile = File(context.cacheDir, "$fileName.jpg").apply {
-            createNewFile()
-            deleteOnExit()
-        }
-
-        return FileProvider.getUriForFile(
-            context,
-            "${context.packageName}.provider",
-            imageFile
-        )
-    }
 
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) {
-            val uri = createImageUri(context)
+            val uri = viewModel.createTemporaryImageUri()
             cameraImageUri = uri
             cameraLauncher.launch(uri!!)
         } else {
@@ -107,7 +94,7 @@ fun LampiranLaporanScreen(initialPhotos: List<String>, onBack: (List<String>) ->
     }
 
     val sendResultAndFinish = {
-        onBack(photos.toList())
+        onBack(state.photos.toList())
     }
 
     BackHandler {
@@ -157,53 +144,34 @@ fun LampiranLaporanScreen(initialPhotos: List<String>, onBack: (List<String>) ->
                         message = "Lampiran dapat berupa file berformat JPG, JPEG, PNG, atau PDF, dengan ukuran maksimal 1,5 MB dan maksimal 5 file"
                     )
                     Spacer(Modifier.height(4.dp))
-                    photos.take(5).forEach { photoUri ->
+                    state.photos.take(5).forEach { photoUri ->
                         val fileName = photoUri.substringAfterLast("/")
                         ImageItem(
                             text = fileName,
-                            onDelete = { photos.remove(photoUri) }
+                            onDelete = { viewModel.onDeletePhoto(photoUri) }
                         )
                     }
                     Spacer(Modifier.height(4.dp))
                     AddImage(
-                        onClick = {
-
-                            showBottomSheet = true
-                        }
+                        onClick = viewModel::onAddImageClick
                     )
                 }
             }
-            PrimaryButton(
-                modifier = Modifier.fillMaxWidth(),
-                text = "SIMPAN",
-                onClick = {
-                },
-                enabled = false
-            )
         }
     }
 
-    if (showBottomSheet) {
+    if (state.showBottomSheet) {
         BottomSheetList(
             options = listOption,
             title = "Tambah Gambar",
             onClick = { selectedOption ->
                 when (selectedOption) {
-                    "Ambil Gambar" -> {
-                        if (photos.size < 5) {
-                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                        }
-                    }
-
-                    "Pilih Gambar dari Galeri" -> {
-                        if (photos.size < 5) {
-                            galleryLauncher.launch("image/*")
-                        }
-                    }
+                    "Ambil Gambar" -> cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                    "Pilih Gambar dari Galeri" -> galleryLauncher.launch("image/*")
                 }
-                showBottomSheet = false
+                viewModel.onDismissBottomSheet()
             },
-            onDismissRequest = { showBottomSheet = false },
+            onDismissRequest = viewModel::onDismissBottomSheet,
             sheetState = sheetState
         )
     }

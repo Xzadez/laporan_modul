@@ -9,5 +9,6 @@ data class Laporan(
     val status: String,
     val photos: List<String> = emptyList(),
     val description: String,
-    val isDraft: Boolean = false
+    val isDraft: Boolean = false,
+    val createdAt: Long = System.currentTimeMillis()
 )

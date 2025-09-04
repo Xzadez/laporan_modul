@@ -51,6 +51,7 @@ private val WargaDarkColorScheme = darkColorScheme(
     tertiary = GreenTertiary,
     background = GreenBackground,
     surface = GreenBackground,
+    onSurface = textPrimary,
     onBackground = textPrimary,
     onPrimary = Color.White,
     onSurfaceVariant = textPrimary
@@ -64,6 +65,7 @@ private val PengurusDarkColorScheme = darkColorScheme(
     surface = PurpleBackground,
     onBackground = textPrimary,
     onPrimary = Color.White,
+    onSurface = textPrimary,
     onSurfaceVariant = textPrimary
 )
 

@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ulud.laporan_ewarga.domain.model.Laporan
 import com.ulud.laporan_ewarga.ui.theme.LaporaneWargaTheme
-import com.ulud.laporan_ewarga.ui.theme.UserRole
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -36,7 +35,6 @@ class DetailLaporanActivity : ComponentActivity() {
         val isPreview = intent.getBooleanExtra("isPreview", false)
         val canShowMenu = intent.getBooleanExtra("can_show_menu", false)
 
-        viewModel.initialize(laporan, isPreview, canShowMenu)
 
         setContent {
             val userRole by viewModel.userRole.collectAsStateWithLifecycle(initialValue = null)
@@ -44,9 +42,11 @@ class DetailLaporanActivity : ComponentActivity() {
             val currentRole = userRole
 
             if (currentRole != null) {
+                viewModel.initialize(laporan, isPreview, canShowMenu, currentRole)
                 LaporaneWargaTheme(currentRole) {
                     DetailLaporanScreen(
                         viewModel = viewModel,
+                        userRole = currentRole,
                         onBack = { finish() },
                         onDelete = {
                             viewModel.onDelete()

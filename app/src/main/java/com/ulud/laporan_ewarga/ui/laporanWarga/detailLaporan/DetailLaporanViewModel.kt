@@ -7,6 +7,7 @@ import com.ulud.laporan_ewarga.domain.model.Laporan
 import com.ulud.laporan_ewarga.domain.useCase.DeleteLaporanUseCase
 import com.ulud.laporan_ewarga.domain.useCase.UpdateLaporanUseCase
 import com.ulud.laporan_ewarga.ui.theme.UserRole
+import com.ulud.laporan_ewarga.utils.FormattedDate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -21,21 +22,33 @@ import javax.inject.Inject
 class DetailLaporanViewModel @Inject constructor(
     private val updateLaporanUseCase: UpdateLaporanUseCase,
     private val deleteLaporanUseCase: DeleteLaporanUseCase,
-    userPreferencesRepository: UserPreferencesRepository
+    userPreferencesRepository: UserPreferencesRepository,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(DetailLaporanUiState())
+    private val _state = MutableStateFlow(DetailLaporanState())
     val state = _state.asStateFlow()
 
     val userRole: StateFlow<UserRole?> = userPreferencesRepository.userRoleFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-    fun initialize(laporan: Laporan, isPreview: Boolean, canShowMenu: Boolean) {
+    fun initialize(laporan: Laporan, isPreview: Boolean, canShowMenu: Boolean, userRole: UserRole) {
         _state.update {
+            val dateText = when {
+                isPreview -> "Preview"
+                laporan.status.equals("Draft", ignoreCase = true) -> "Draft"
+                else -> FormattedDate(laporan.createdAt)
+            }
+
+            val status = laporan.status.lowercase()
+            val isLihatResponButtonVisible =
+                userRole == UserRole.WARGA && status !in listOf("antrian", "drfat") && !isPreview
+
             it.copy(
                 laporan = laporan,
                 isPreview = isPreview,
-                canShowMenu = canShowMenu
+                canShowMenu = canShowMenu,
+                dateText = dateText,
+                isLihatResponButtonVisible =  isLihatResponButtonVisible
             )
         }
     }
@@ -57,7 +70,8 @@ class DetailLaporanViewModel @Inject constructor(
 
     fun onPreviousImage() {
         _state.update {
-            val newIndex = (it.selectedImageIndex - 1 + (it.laporan?.photos?.size ?: 1)) % (it.laporan?.photos?.size ?: 1)
+            val newIndex = (it.selectedImageIndex - 1 + (it.laporan?.photos?.size
+                ?: 1)) % (it.laporan?.photos?.size ?: 1)
             it.copy(selectedImageIndex = newIndex)
         }
     }

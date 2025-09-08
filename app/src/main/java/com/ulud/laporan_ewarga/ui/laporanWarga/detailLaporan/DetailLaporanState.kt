@@ -2,10 +2,12 @@ package com.ulud.laporan_ewarga.ui.laporanWarga.detailLaporan
 
 import com.ulud.laporan_ewarga.domain.model.Laporan
 
-data class DetailLaporanUiState(
+data class DetailLaporanState(
     val laporan: Laporan? = null,
     val isPreview: Boolean = false,
     val canShowMenu: Boolean = false,
     val showImageDialog: Boolean = false,
-    val selectedImageIndex: Int = 0
+    val selectedImageIndex: Int = 0,
+    val dateText: String = "",
+    val isLihatResponButtonVisible: Boolean = false
 )

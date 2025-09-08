@@ -122,7 +122,7 @@ fun PublicationDialog(
                         .height(50.dp),
                     shape = RoundedCornerShape(50),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF00C897),
+                        containerColor = MaterialTheme.colorScheme.primary,
                         disabledContainerColor = Color.LightGray
                     )
                 ) {
@@ -146,7 +146,7 @@ private fun ChoiceOption(
         label = "ChoiceBackground"
     )
     val borderColor by animateColorAsState(
-        targetValue = if (selected) colorResource(R.color.primaryColor) else Color.LightGray,
+        targetValue = if (selected) MaterialTheme.colorScheme.primary else Color.LightGray,
         label = "ChoiceBorder"
     )
 
@@ -163,7 +163,7 @@ private fun ChoiceOption(
             modifier = Modifier.size(16.dp),
             selected = selected,
             onClick = onClick,
-            selectedColor = colorResource(R.color.primaryColor)
+            selectedColor = MaterialTheme.colorScheme.primary
         )
         Spacer(modifier = Modifier.width(10.dp))
         Column {

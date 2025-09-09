@@ -10,12 +10,17 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ulud.laporan_ewarga.ui.Dimen
 import com.ulud.laporan_ewarga.ui.components.PrimaryButton
+import com.ulud.laporan_ewarga.ui.laporanWarga.createLaporan.components.ResponLaporanDialog
+import com.ulud.laporan_ewarga.ui.laporanWarga.detailLaporan.component.BottomButton
 import com.ulud.laporan_ewarga.ui.laporanWarga.detailLaporan.component.DetailContentBody
 import com.ulud.laporan_ewarga.ui.laporanWarga.detailLaporan.component.DetailHeaderImage
 import com.ulud.laporan_ewarga.ui.laporanWarga.detailLaporan.component.DetailTopActions
@@ -32,7 +37,21 @@ fun DetailLaporanScreen(
     onLihatResponClick: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
+    var showDialog by remember { mutableStateOf(false) }
     val laporan = state.laporan ?: return
+
+    if (showDialog) {
+        ResponLaporanDialog(
+            namaLaporan = "Jalan Rusak di Samping Kantor Pos",
+            onDismissRequest = {
+                showDialog = false
+            },
+            onProsesClick = {
+                println("Laporan sedang diproses...")
+                showDialog = false
+            }
+        )
+    }
 
     Scaffold(
         containerColor = Color.White,
@@ -45,7 +64,9 @@ fun DetailLaporanScreen(
                 ) {
                     PrimaryButton(
                         "Respon",
-                        onClick = {},
+                        onClick = {
+                            showDialog = true
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(Dimen.Padding.normal)

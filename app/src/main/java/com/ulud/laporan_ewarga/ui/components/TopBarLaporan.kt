@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -35,6 +36,7 @@ import com.ulud.laporan_ewarga.ui.Dimen
 enum class LeadingIconType {
     MENU,
     BACK,
+    CLOSE,
     NONE
 }
 
@@ -95,6 +97,27 @@ fun TopBarLaporan(
                                 ),
                             onBack = onLeadingIconClick
                         )
+                    }
+
+                    LeadingIconType.CLOSE -> {
+                        val border = BorderStroke(1.dp, Color.LightGray.copy(0.6f))
+                        IconButton(
+                            modifier = Modifier
+                                .size(Dimen.IconSize.large)
+                                .then(
+                                    if (showLeadingIconBorder) Modifier.border(
+                                        border,
+                                        CircleShape
+                                    ) else Modifier
+                                ),
+                            onClick = onLeadingIconClick
+                        ) {
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = "Close",
+                                modifier = Modifier.size(Dimen.IconSize.medium)
+                            )
+                        }
                     }
 
                     LeadingIconType.NONE -> {

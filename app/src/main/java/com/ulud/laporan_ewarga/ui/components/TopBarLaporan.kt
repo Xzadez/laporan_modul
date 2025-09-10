@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CardElevation
@@ -35,6 +36,7 @@ import com.ulud.laporan_ewarga.ui.Dimen
 
 enum class LeadingIconType {
     MENU,
+    SETTING,
     BACK,
     CLOSE,
     NONE
@@ -80,6 +82,22 @@ fun TopBarLaporan(
                             Icon(
                                 Icons.Default.Menu,
                                 contentDescription = "Menu",
+                                modifier = Modifier.size(Dimen.IconSize.medium)
+                            )
+                        }
+                    }
+
+                    LeadingIconType.SETTING -> {
+                        IconButton(
+                            modifier = Modifier
+                                .background(Color.White, CircleShape)
+                                .size(Dimen.IconSize.large)
+                                .padding(Dimen.Padding.extraSmall),
+                            onClick = onLeadingIconClick
+                        ) {
+                            Icon(
+                                Icons.Default.MoreVert,
+                                contentDescription = "Setting",
                                 modifier = Modifier.size(Dimen.IconSize.medium)
                             )
                         }

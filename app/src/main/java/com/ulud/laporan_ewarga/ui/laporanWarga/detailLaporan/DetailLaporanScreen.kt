@@ -37,40 +37,59 @@ fun DetailLaporanScreen(
     onLihatResponClick: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
-    var showDialog by remember { mutableStateOf(false) }
+//    var showDialog by remember { mutableStateOf(false) }
     val laporan = state.laporan ?: return
-
-    if (showDialog) {
-        ResponLaporanDialog(
-            namaLaporan = "Jalan Rusak di Samping Kantor Pos",
-            onDismissRequest = {
-                showDialog = false
-            },
-            onProsesClick = {
-                println("Laporan sedang diproses...")
-                showDialog = false
-            }
-        )
-    }
+//
+//    if (showDialog) {
+//        ResponLaporanDialog(
+//            namaLaporan = "Jalan Rusak di Samping Kantor Pos",
+//            onDismissRequest = {
+//                showDialog = false
+//            },
+//            onProsesClick = {
+//                println("Laporan sedang diproses...")
+//                showDialog = false
+//            }
+//        )
+//    }
 
     Scaffold(
         containerColor = Color.White,
         bottomBar = {
-            if (userRole == UserRole.PENGURUS && !state.isPreview) {
-                Surface(
-                    color = Color.White,
-                    shadowElevation = 20.dp,
-                    tonalElevation = 20.dp
-                ) {
-                    PrimaryButton(
-                        "Respon",
-                        onClick = {
-                            showDialog = true
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(Dimen.Padding.normal)
-                    )
+            val status = laporan.status.lowercase()
+            if (!state.isPreview) {
+                val showButton = when {
+                    userRole == UserRole.PENGURUS && status == "antrian" -> true
+                    status == "proses" -> true
+                    else -> false
+                }
+
+                if (showButton) {
+                    val buttonText = if (userRole == UserRole.PENGURUS && status == "antrian") {
+                        "Respon"
+                    } else {
+                        "Lihat Respon"
+                    }
+
+                    val onClickAction = if (userRole == UserRole.PENGURUS && status == "antrian") {
+                        { viewModel.onResponLaporan() }
+                    } else {
+                        onLihatResponClick
+                    }
+
+                    Surface(
+                        color = Color.White,
+                        shadowElevation = 20.dp,
+                        tonalElevation = 20.dp
+                    ) {
+                        PrimaryButton(
+                            text = buttonText,
+                            onClick = onClickAction,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(Dimen.Padding.normal)
+                        )
+                    }
                 }
             }
         }

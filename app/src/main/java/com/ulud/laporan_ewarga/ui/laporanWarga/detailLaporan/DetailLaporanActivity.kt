@@ -13,8 +13,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ulud.laporan_ewarga.domain.model.Laporan
+import com.ulud.laporan_ewarga.ui.laporanWarga.responLaporan.ResponLaporanActivity
 import com.ulud.laporan_ewarga.ui.theme.LaporaneWargaTheme
 import dagger.hilt.android.AndroidEntryPoint
+import splitties.activities.start
 
 @AndroidEntryPoint
 class DetailLaporanActivity : ComponentActivity() {
@@ -57,8 +59,7 @@ class DetailLaporanActivity : ComponentActivity() {
                             finish()
                         },
                         onLihatResponClick = {
-                            Toast.makeText(this, "Membuka halaman respon...", Toast.LENGTH_SHORT)
-                                .show()
+                            start<ResponLaporanActivity>()
                         }
                     )
                 }

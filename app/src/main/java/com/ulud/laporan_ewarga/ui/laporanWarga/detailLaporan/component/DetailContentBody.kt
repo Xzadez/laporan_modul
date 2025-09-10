@@ -140,16 +140,6 @@ fun DetailContentBody(
                 lineHeight = 20.sp
             )
 
-            if (state.isLihatResponButtonVisible) {
-                Spacer(Modifier.height(Dimen.Padding.large))
-                PrimaryButton(
-                    text = "Lihat Respon",
-                    onClick = onLihatResponClick,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = Dimen.Padding.normal)
-                )
-            }
             Spacer(Modifier.height(50.dp))
         }
     }

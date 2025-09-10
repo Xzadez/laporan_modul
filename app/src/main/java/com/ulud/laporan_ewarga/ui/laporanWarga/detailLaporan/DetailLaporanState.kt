@@ -9,5 +9,4 @@ data class DetailLaporanState(
     val showImageDialog: Boolean = false,
     val selectedImageIndex: Int = 0,
     val dateText: String = "",
-    val isLihatResponButtonVisible: Boolean = false
 )

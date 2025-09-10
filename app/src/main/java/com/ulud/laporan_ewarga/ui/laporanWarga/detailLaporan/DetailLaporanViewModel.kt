@@ -39,16 +39,11 @@ class DetailLaporanViewModel @Inject constructor(
                 else -> FormattedDate(laporan.createdAt)
             }
 
-            val status = laporan.status.lowercase()
-            val isLihatResponButtonVisible =
-                userRole == UserRole.WARGA && status !in listOf("antrian", "drfat") && !isPreview
-
             it.copy(
                 laporan = laporan,
                 isPreview = isPreview,
                 canShowMenu = canShowMenu,
                 dateText = dateText,
-                isLihatResponButtonVisible =  isLihatResponButtonVisible
             )
         }
     }
@@ -75,6 +70,19 @@ class DetailLaporanViewModel @Inject constructor(
             it.copy(selectedImageIndex = newIndex)
         }
     }
+
+    fun onResponLaporan() {
+        viewModelScope.launch {
+            _state.value.laporan?.let {
+                val updatedLaporan = it.copy(status = "Proses")
+                updateLaporanUseCase(updatedLaporan)
+                _state.update { currentState ->
+                    currentState.copy(laporan = updatedLaporan)
+                }
+            }
+        }
+    }
+
 
     fun onDelete() {
         viewModelScope.launch {

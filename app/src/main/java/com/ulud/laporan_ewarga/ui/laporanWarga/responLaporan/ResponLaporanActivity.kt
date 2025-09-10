@@ -8,7 +8,9 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ulud.laporan_ewarga.ui.laporanWarga.lampiranLaporan.LampiranLaporanViewModel
 import com.ulud.laporan_ewarga.ui.theme.LaporaneWargaTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class ResponLaporanActivity : ComponentActivity() {
     private val viewModel: LampiranLaporanViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,6 +22,9 @@ class ResponLaporanActivity : ComponentActivity() {
 
             if (currentRole != null) {
                 LaporaneWargaTheme(currentRole) {
+                    ResponLaporanScreen(
+                        onBack = {finish()}
+                    )
                 }
             }
         }

@@ -14,8 +14,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ResponLaporanViewModel @Inject constructor(
-    private val validateAttachmentCountUseCase: ValidateAttachmentCountUseCase,
-    private val imageRepository: ImageRepository,
     userPreferencesRepository: UserPreferencesRepository,
 ) : ViewModel() {
     val userRole: StateFlow<UserRole?> = userPreferencesRepository.userRoleFlow

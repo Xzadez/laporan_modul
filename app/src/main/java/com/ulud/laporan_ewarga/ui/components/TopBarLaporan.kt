@@ -36,9 +36,14 @@ import com.ulud.laporan_ewarga.ui.Dimen
 
 enum class LeadingIconType {
     MENU,
-    SETTING,
     BACK,
     CLOSE,
+    NONE
+}
+
+enum class TrailingIconType {
+    ADD,
+    SETTING,
     NONE
 }
 
@@ -48,8 +53,9 @@ fun TopBarLaporan(
     title: String = "",
     colors: Color = colorResource(R.color.white),
     leadingIconType: LeadingIconType = LeadingIconType.NONE,
+    trailingIconType: TrailingIconType = TrailingIconType.NONE,
     showLeadingIconBorder: Boolean = false,
-    showTrailingIcon: Boolean = false,
+    showTrailingIconBorder: Boolean = false,
     onLeadingIconClick: () -> Unit = {},
     onTrailingIconClick: () -> Unit = {},
 ) {
@@ -70,12 +76,19 @@ fun TopBarLaporan(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                val border = BorderStroke(1.dp, Color.LightGray.copy(0.6f))
                 when (leadingIconType) {
                     LeadingIconType.MENU -> {
                         IconButton(
                             modifier = Modifier
                                 .background(Color.White, CircleShape)
                                 .size(Dimen.IconSize.large)
+                                .then(
+                                    if (showLeadingIconBorder) Modifier.border(
+                                        border,
+                                        CircleShape
+                                    ) else Modifier
+                                )
                                 .padding(Dimen.Padding.extraSmall),
                             onClick = onLeadingIconClick
                         ) {
@@ -87,24 +100,7 @@ fun TopBarLaporan(
                         }
                     }
 
-                    LeadingIconType.SETTING -> {
-                        IconButton(
-                            modifier = Modifier
-                                .background(Color.White, CircleShape)
-                                .size(Dimen.IconSize.large)
-                                .padding(Dimen.Padding.extraSmall),
-                            onClick = onLeadingIconClick
-                        ) {
-                            Icon(
-                                Icons.Default.MoreVert,
-                                contentDescription = "Setting",
-                                modifier = Modifier.size(Dimen.IconSize.medium)
-                            )
-                        }
-                    }
-
                     LeadingIconType.BACK -> {
-                        val border = BorderStroke(1.dp, Color.LightGray.copy(0.6f))
                         BackButton(
                             modifier = Modifier
                                 .then(
@@ -118,7 +114,6 @@ fun TopBarLaporan(
                     }
 
                     LeadingIconType.CLOSE -> {
-                        val border = BorderStroke(1.dp, Color.LightGray.copy(0.6f))
                         IconButton(
                             modifier = Modifier
                                 .size(Dimen.IconSize.large)
@@ -139,7 +134,7 @@ fun TopBarLaporan(
                     }
 
                     LeadingIconType.NONE -> {
-                        if (!showTrailingIcon) {
+                        if (trailingIconType == TrailingIconType.NONE) {
                             Spacer(modifier = Modifier.size(Dimen.IconSize.large))
                         }
                     }
@@ -156,24 +151,57 @@ fun TopBarLaporan(
                     fontWeight = FontWeight.Medium
                 )
             }
+            val border = BorderStroke(1.dp, Color.LightGray.copy(0.6f))
 
-            if (showTrailingIcon) {
-                IconButton(
-                    modifier = Modifier
-                        .background(Color.White, CircleShape)
-                        .size(Dimen.IconSize.large)
-                        .padding(Dimen.Padding.extraSmall),
-                    onClick = onTrailingIconClick
-                ) {
-                    Icon(
-                        Icons.Default.Add,
-                        contentDescription = "Plus",
-                        modifier = Modifier.size(Dimen.IconSize.medium)
-                    )
+            when (trailingIconType) {
+                TrailingIconType.ADD -> {
+                    IconButton(
+                        modifier = Modifier
+                            .background(Color.White, CircleShape)
+                            .size(Dimen.IconSize.large)
+                            .then(
+                                if (showTrailingIconBorder) Modifier.border(
+                                    border,
+                                    CircleShape
+                                ) else Modifier
+                            )
+                            .padding(Dimen.Padding.extraSmall),
+                        onClick = onTrailingIconClick
+                    ) {
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = "Plus",
+                            modifier = Modifier.size(Dimen.IconSize.medium)
+                        )
+                    }
                 }
-            } else {
-                if (leadingIconType == LeadingIconType.NONE) {
-                    Spacer(modifier = Modifier.size(Dimen.IconSize.large))
+
+                TrailingIconType.SETTING -> {
+                    IconButton(
+                        modifier = Modifier
+                            .background(Color.White, CircleShape)
+                            .size(Dimen.IconSize.large)
+                            .then(
+                                if (showTrailingIconBorder) Modifier.border(
+                                    border,
+                                    CircleShape
+                                ) else Modifier
+                            )
+                            .padding(Dimen.Padding.extraSmall),
+                        onClick = onTrailingIconClick
+                    ) {
+                        Icon(
+                            Icons.Default.MoreVert,
+                            contentDescription = "Setting",
+                            modifier = Modifier.size(Dimen.IconSize.medium)
+                        )
+                    }
+                }
+
+                TrailingIconType.NONE -> {
+                    if (leadingIconType == LeadingIconType.NONE) {
+                        Spacer(modifier = Modifier.size(Dimen.IconSize.large))
+                    }
                 }
             }
         }

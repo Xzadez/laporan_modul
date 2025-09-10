@@ -20,13 +20,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import com.ulud.laporan_ewarga.R
-import com.ulud.laporan_ewarga.ui.SetStatusBarColor
 import com.ulud.laporan_ewarga.ui.components.LeadingIconType
 import com.ulud.laporan_ewarga.ui.components.TopBarLaporan
+import com.ulud.laporan_ewarga.ui.components.TrailingIconType
 import com.ulud.laporan_ewarga.ui.laporanWarga.tabs.laporanKuTab.LaporanKuTab
 import com.ulud.laporan_ewarga.ui.laporanWarga.tabs.laporanTab.LaporanTab
 import kotlinx.coroutines.launch
@@ -40,8 +39,10 @@ fun LaporanWargaScreen(onMenu: () -> Unit = {}, onCreateLaporan: () -> Unit = {}
             TopBarLaporan(
                 title = "Laporan Warga",
                 elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                showLeadingIconBorder = true,
+                showTrailingIconBorder = true,
                 leadingIconType = LeadingIconType.MENU,
-                showTrailingIcon = true,
+                trailingIconType = TrailingIconType.ADD,
                 onLeadingIconClick = onMenu,
                 onTrailingIconClick = onCreateLaporan
             )

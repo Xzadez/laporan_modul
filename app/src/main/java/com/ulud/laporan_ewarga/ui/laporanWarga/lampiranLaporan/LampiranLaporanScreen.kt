@@ -70,14 +70,14 @@ fun LampiranLaporanScreen(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
         if (success) {
-            cameraImageUri?.let { viewModel.onAddPhoto(it.toString()) }
+            cameraImageUri?.let { viewModel.onPhotoCamera(it) }
         }
     }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        uri?.let { viewModel.onAddPhoto(it.toString()) }
+        uri?.let { viewModel.onPhotoGallery(it) }
     }
 
 

@@ -30,4 +30,32 @@ class ImageRepositoryImpl @Inject constructor(
             imageFile
         )
     }
+
+    override fun copyImageToInternalStorage(sourceUri: Uri): Uri? {
+        return try {
+            val inputStream = context.contentResolver.openInputStream(sourceUri) ?: return null
+
+            val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+            val fileName = "laporan_$timeStamp.jpg"
+            val destinationFile = File(context.cacheDir, fileName).apply {
+                createNewFile()
+                deleteOnExit()
+            }
+
+            val outputStream = destinationFile.outputStream()
+            inputStream.use { input ->
+                outputStream.use { output ->
+                    input.copyTo(output)
+                }
+            }
+
+            FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.provider",
+                destinationFile
+            )
+        } catch (e: Exception) {
+            null
+        }
+    }
 }

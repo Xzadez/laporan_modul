@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -34,10 +35,26 @@ class LampiranLaporanViewModel @Inject constructor(
         _state.update { it.copy(photos = initialPhotos) }
     }
 
-    fun onAddPhoto(uriString: String) {
+    fun onPhotoCamera(uri: Uri) {
         if (validateAttachmentCountUseCase(state.value.photos)) {
-            val updatedPhotos = state.value.photos + uriString
+            val updatedPhotos = state.value.photos + uri.toString()
             _state.update { it.copy(photos = updatedPhotos) }
+        } else {
+            _state.update { it.copy(errorMessage = "Maksimal 5 foto tercapai") }
+        }
+    }
+
+    fun onPhotoGallery(uri: Uri) {
+        if (validateAttachmentCountUseCase(state.value.photos)) {
+            viewModelScope.launch {
+                val internalUri = imageRepository.copyImageToInternalStorage(uri)
+                if (internalUri != null) {
+                    val updatedPhotos = state.value.photos + internalUri.toString()
+                    _state.update { it.copy(photos = updatedPhotos) }
+                } else {
+                    _state.update { it.copy(errorMessage = "Gagal menyimpan gambar dari galeri") }
+                }
+            }
         } else {
             _state.update { it.copy(errorMessage = "Maksimal 5 foto tercapai") }
         }
